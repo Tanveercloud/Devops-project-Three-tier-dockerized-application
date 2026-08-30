@@ -1,0 +1,43 @@
+services:
+
+  database:
+    image: mongo:latest
+    container_name: database
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mern-network
+
+  backend:
+    build:
+      context: ./backend
+    image: mern-backend:v2
+    container_name: mern-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - database
+    networks:
+      - mern-network
+
+  frontend:
+    build:
+      context: ./frontend
+    image: mern-frontend:v1
+    container_name: mern-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge
